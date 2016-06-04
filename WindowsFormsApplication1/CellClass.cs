@@ -98,7 +98,7 @@ namespace WindowsFormsApplication1
             set { aliveNeighborCount = value; }
         }
 
-        public int GetAliveNeighborCount(CellClass[,] aUniniverse)
+        public int GetAliveNeighborCount(CellClass[,] aUniniverse, bool toriadal)
         {           
             int aValue = 0;
 
@@ -109,8 +109,21 @@ namespace WindowsFormsApplication1
                 int checkY = myNeighbors[i].mY;
                 if (checkX < 0 || checkX > aUniniverse.GetLength(0) -1 || checkY < 0 || checkY > aUniniverse.GetLength(1) -1)
                 {
-
+                    if(toriadal == false)
                     continue;
+                    else
+                    {
+                        if (checkY > aUniniverse.GetLength(1) - 1)
+                            checkY = 0;
+                        if (checkX > aUniniverse.GetLength(0) - 1)
+                            checkX = 0;
+                        if (checkY < 0)
+                           checkY =  aUniniverse.GetLength(1) - 1;
+                        if (checkX < 0)
+                            checkX = aUniniverse.GetLength(0) - 1;
+
+
+                    }
                 }
                 myNeighbors[i].Alive = aUniniverse[checkX, checkY].Alive;
 

@@ -13,13 +13,16 @@ namespace WindowsFormsApplication1
     public partial class Form1 : Form
     {
         
-        CellClass[,] universe = new CellClass[100, 100];
+        CellClass[,] universe = new CellClass[20, 20];
         List<CellClass> someCells = new List<CellClass>();
         float uWidth;
         float uHeight;
         Timer myTimer = new Timer();
         int uGenerations = 0;
-       
+        Pen gridCellPen = new Pen(Color.Black, 1);
+        Pen gridCelx10lPen = new Pen(Color.Red, 3);
+        bool toridal = true;
+
         //  List<CellClass> someCells = new List<CellClass>();
 
         public Form1()
@@ -116,7 +119,7 @@ namespace WindowsFormsApplication1
 
             for (int i = 0; i < someCells.Count; i++)
             {
-                int aCount = someCells[i].GetAliveNeighborCount(universe); // universe[x, y].GetAliveNeighborCount(someCells);
+                int aCount = someCells[i].GetAliveNeighborCount(universe, toridal); // universe[x, y].GetAliveNeighborCount(someCells);
 
                 if (universe[someCells[i].mX, someCells[i].mY].Alive == true)
                 {
@@ -204,9 +207,26 @@ namespace WindowsFormsApplication1
 
                 if (someCells[i].Alive == true)
                 {
+
                     e.Graphics.FillRectangle(Brushes.Black, aRect);
                 }
-                e.Graphics.DrawRectangle(Pens.Black, aRect.X, aRect.Y, aRect.Width, aRect.Height);
+                if (someCells[i].mY % 10 == 0)
+                {
+                    // e.Graphics.DrawRectangle(Pens.Red, aRect.X, aRect.Y, aRect.Width, aRect.Height);
+                    //e.Graphics.DrawLine(Pens.Red, aRect.X, aRect.Y, graphicsPanel1.Width,graphicsPanel1.Height);
+                    Pen aPen = new Pen(Color.Red, 3 );
+                    e.Graphics.DrawLine(aPen, aRect.X, aRect.Y, graphicsPanel1.Width, aRect.Y);
+                    //e.Graphics.DrawLine(aPen, new Point((int)aRect.X, (int)aRect.Y), new Point(graphicsPanel1.Width, (int)aRect.Y));
+                    e.Graphics.DrawLine(aPen, aRect.X, aRect.Y, graphicsPanel1.Width, aRect.Y);
+                }
+                if(someCells[i].mX % 10 == 0)
+                {
+                    
+                    e.Graphics.DrawLine(gridCelx10lPen, aRect.X, aRect.Y, aRect.X, graphicsPanel1.Height);
+                }
+                
+                    e.Graphics.DrawRectangle(gridCellPen, aRect.X, aRect.Y, aRect.Width, aRect.Height);
+
                 /*  
 
       for (int x = 0; x < universe.GetLength(0); x++)
@@ -248,14 +268,14 @@ namespace WindowsFormsApplication1
 
         private void newToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            for (int y = 0; y < universe.GetLength(1); y++)
+
+            for (int i = 0; i < someCells.Count; i++)
             {
-                for (int x = 0; x < universe.GetLength(0); x++)
-                {
-                    universe[x, y].Alive = false;
-                    
-                }
+                someCells[i].Alive = false;
             }
+                uGenerations = 0;
+            statusLabel1.Text = "Generations: " + uGenerations.ToString();
+            myTimer.Enabled = false;
             graphicsPanel1.Invalidate();
 
         }
@@ -268,6 +288,7 @@ namespace WindowsFormsApplication1
         private void pauseToolStripMenuItem_Click(object sender, EventArgs e)
         {
             myTimer.Enabled = false;
+           
         }
 
         private void nextToolStripMenuItem_Click(object sender, EventArgs e)
@@ -276,6 +297,17 @@ namespace WindowsFormsApplication1
             myTimer.Tag = "true";
             myTimer.Enabled = true;
 
+        }
+
+        private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Options_Form optFrm = new Options_Form();
+            
+
+            if (optFrm.ShowDialog() == DialogResult.OK)
+            {
+               // optFrm.ShowDialog();
+            }
         }
     }
 }
