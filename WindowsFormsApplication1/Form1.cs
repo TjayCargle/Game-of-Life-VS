@@ -21,7 +21,9 @@ namespace WindowsFormsApplication1
         int uGenerations = 0;
         Pen gridCellPen = new Pen(Color.Black, 1);
         Pen gridCelx10lPen = new Pen(Color.Red, 3);
-        bool toridal = true;
+        bool toridal = false;
+        bool viewGrid = true;
+        int runUntil = 0;
 
         //  List<CellClass> someCells = new List<CellClass>();
 
@@ -48,6 +50,7 @@ namespace WindowsFormsApplication1
 
         private void MyTimer_Tick(object sender, EventArgs e)
         {
+           
 
             // Call Next Generation
             NextGen();
@@ -63,6 +66,9 @@ namespace WindowsFormsApplication1
                 myTimer.Enabled = false;
                 myTimer.Tag = false;
             }
+            if (runUntil > 0)
+                if (uGenerations == runUntil)
+                    myTimer.Enabled = false;
 
         }
 
@@ -169,6 +175,7 @@ namespace WindowsFormsApplication1
                 }
 
             }
+            
 
             /*
             for (int y = 0; y < universe.GetLength(1); y++)
@@ -191,7 +198,7 @@ namespace WindowsFormsApplication1
           uWidth = graphicsPanel1.ClientSize.Width / universe.GetLength(0); ;
           uHeight = graphicsPanel1.ClientSize.Height / universe.GetLength(1);
 
-
+          
             for (int i = 0; i < someCells.Count; i++) 
             {
 
@@ -210,22 +217,25 @@ namespace WindowsFormsApplication1
 
                     e.Graphics.FillRectangle(Brushes.Black, aRect);
                 }
-                if (someCells[i].mY % 10 == 0)
+                if (viewGrid == true)
                 {
-                    // e.Graphics.DrawRectangle(Pens.Red, aRect.X, aRect.Y, aRect.Width, aRect.Height);
-                    //e.Graphics.DrawLine(Pens.Red, aRect.X, aRect.Y, graphicsPanel1.Width,graphicsPanel1.Height);
-                    Pen aPen = new Pen(Color.Red, 3 );
-                    e.Graphics.DrawLine(aPen, aRect.X, aRect.Y, graphicsPanel1.Width, aRect.Y);
-                    //e.Graphics.DrawLine(aPen, new Point((int)aRect.X, (int)aRect.Y), new Point(graphicsPanel1.Width, (int)aRect.Y));
-                    e.Graphics.DrawLine(aPen, aRect.X, aRect.Y, graphicsPanel1.Width, aRect.Y);
-                }
-                if(someCells[i].mX % 10 == 0)
-                {
-                    
-                    e.Graphics.DrawLine(gridCelx10lPen, aRect.X, aRect.Y, aRect.X, graphicsPanel1.Height);
-                }
-                
+                    if (someCells[i].mY % 10 == 0)
+                    {
+                        // e.Graphics.DrawRectangle(Pens.Red, aRect.X, aRect.Y, aRect.Width, aRect.Height);
+                        //e.Graphics.DrawLine(Pens.Red, aRect.X, aRect.Y, graphicsPanel1.Width,graphicsPanel1.Height);
+                        Pen aPen = new Pen(Color.Red, 3);
+                        e.Graphics.DrawLine(aPen, aRect.X, aRect.Y, graphicsPanel1.Width, aRect.Y);
+                        //e.Graphics.DrawLine(aPen, new Point((int)aRect.X, (int)aRect.Y), new Point(graphicsPanel1.Width, (int)aRect.Y));
+                        e.Graphics.DrawLine(aPen, aRect.X, aRect.Y, graphicsPanel1.Width, aRect.Y);
+                    }
+                    if (someCells[i].mX % 10 == 0)
+                    {
+
+                        e.Graphics.DrawLine(gridCelx10lPen, aRect.X, aRect.Y, aRect.X, graphicsPanel1.Height);
+                    }
+
                     e.Graphics.DrawRectangle(gridCellPen, aRect.X, aRect.Y, aRect.Width, aRect.Height);
+                }
 
                 /*  
 
@@ -277,18 +287,20 @@ namespace WindowsFormsApplication1
             statusLabel1.Text = "Generations: " + uGenerations.ToString();
             myTimer.Enabled = false;
             graphicsPanel1.Invalidate();
+            nextToolStripMenuItem.Enabled = true;
 
         }
 
         private void startToolStripMenuItem_Click(object sender, EventArgs e)
         {
             myTimer.Enabled = true;
+            nextToolStripMenuItem.Enabled = false;
         }
 
         private void pauseToolStripMenuItem_Click(object sender, EventArgs e)
         {
             myTimer.Enabled = false;
-           
+            nextToolStripMenuItem.Enabled = true;
         }
 
         private void nextToolStripMenuItem_Click(object sender, EventArgs e)
@@ -306,8 +318,68 @@ namespace WindowsFormsApplication1
 
             if (optFrm.ShowDialog() == DialogResult.OK)
             {
-               // optFrm.ShowDialog();
+               //do stuff
             }
         }
+
+        private void gridViewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (viewGrid == true)
+            {
+                gridViewToolStripMenuItem.Checked = false;
+                viewGrid = false;
+            }
+            else
+            {
+                gridViewToolStripMenuItem.Checked = true;
+                viewGrid = true;
+            }
+            graphicsPanel1.Invalidate();
+        }
+
+        private void resetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+    
+
+            for (int i = 0; i < someCells.Count; i++)
+            {
+                someCells[i].Alive = false;
+            }
+            uGenerations = 0;
+            statusLabel1.Text = "Generations: " + uGenerations.ToString();
+            myTimer.Enabled = false;
+            graphicsPanel1.Invalidate();
+            viewGrid = true;
+            gridCellPen.Color = Color.Black;
+            gridCelx10lPen.Color = Color.Red;
+            nextToolStripMenuItem.Enabled = true;
+
+        }
+
+        private void runToToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+      
+            Run2Form run2 = new Run2Form();
+
+            run2.runnerUpDwn.Value = uGenerations;
+            run2.runnerUpDwn.Minimum = run2.runnerUpDwn.Value;
+            myTimer.Enabled = false;
+            if (run2.ShowDialog() == DialogResult.OK)
+            {
+                runUntil = (int)run2.runnerUpDwn.Value;
+                
+               
+            }
+            myTimer.Enabled = true;
+
+
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+       
     }
 }
