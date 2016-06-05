@@ -55,6 +55,7 @@
             this.finiteRadButton = new System.Windows.Forms.RadioButton();
             this.toroidalRadButton = new System.Windows.Forms.RadioButton();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.colorDialog1 = new System.Windows.Forms.ColorDialog();
             this.tabControl1.SuspendLayout();
             this.generalPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.unHeightUpDwn)).BeginInit();
@@ -212,6 +213,7 @@
             this.liveCellColorButton.Size = new System.Drawing.Size(64, 49);
             this.liveCellColorButton.TabIndex = 5;
             this.liveCellColorButton.UseVisualStyleBackColor = false;
+            this.liveCellColorButton.Click += new System.EventHandler(this.liveCellColorButton_Click);
             // 
             // backgrndColorButton
             // 
@@ -221,6 +223,7 @@
             this.backgrndColorButton.Size = new System.Drawing.Size(64, 49);
             this.backgrndColorButton.TabIndex = 4;
             this.backgrndColorButton.UseVisualStyleBackColor = false;
+            this.backgrndColorButton.Click += new System.EventHandler(this.backgrndColorButton_Click);
             // 
             // gridx10button
             // 
@@ -230,6 +233,7 @@
             this.gridx10button.Size = new System.Drawing.Size(64, 49);
             this.gridx10button.TabIndex = 3;
             this.gridx10button.UseVisualStyleBackColor = false;
+            this.gridx10button.Click += new System.EventHandler(this.gridx10button_Click);
             // 
             // label4
             // 
@@ -248,6 +252,7 @@
             this.gridColorButton.Size = new System.Drawing.Size(64, 49);
             this.gridColorButton.TabIndex = 1;
             this.gridColorButton.UseVisualStyleBackColor = false;
+            this.gridColorButton.Click += new System.EventHandler(this.gridColorButton_Click);
             // 
             // resetButton
             // 
@@ -372,5 +377,6 @@
         private System.Windows.Forms.RadioButton toroidalRadButton;
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ColorDialog colorDialog1;
     }
 }

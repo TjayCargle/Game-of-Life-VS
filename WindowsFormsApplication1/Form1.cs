@@ -12,15 +12,18 @@ namespace WindowsFormsApplication1
 {
     public partial class Form1 : Form
     {
-        
+        int uXLength = 20;
+        int uYLength = 20;
         CellClass[,] universe = new CellClass[20, 20];
         List<CellClass> someCells = new List<CellClass>();
         float uWidth;
         float uHeight;
         Timer myTimer = new Timer();
         int uGenerations = 0;
+        int timerSecs = 2;
         Pen gridCellPen = new Pen(Color.Black, 1);
         Pen gridCelx10lPen = new Pen(Color.Red, 3);
+        SolidBrush liveCellBrush = new SolidBrush(Color.Black);
         bool toridal = false;
         bool viewGrid = true;
         int runUntil = 0;
@@ -42,7 +45,7 @@ namespace WindowsFormsApplication1
                    
                 }
             }
-            myTimer.Interval = 2;
+            myTimer.Interval = timerSecs;
             myTimer.Tick += MyTimer_Tick;
             myTimer.Tag = "false";
             myTimer.Enabled = false;
@@ -214,8 +217,8 @@ namespace WindowsFormsApplication1
 
                 if (someCells[i].Alive == true)
                 {
-
-                    e.Graphics.FillRectangle(Brushes.Black, aRect);
+                    
+                    e.Graphics.FillRectangle(liveCellBrush, aRect);
                 }
                 if (viewGrid == true)
                 {
@@ -314,12 +317,49 @@ namespace WindowsFormsApplication1
         private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Options_Form optFrm = new Options_Form();
+            optFrm.secUpDwn.Value      = timerSecs;
+            optFrm.wUpDwn.Value        = uXLength;
+            optFrm.hUpDwn.Value        = uYLength;
+            optFrm.gridCol.BackColor   = gridCellPen.Color;
+            optFrm.gridx10Col.BackColor= gridCelx10lPen.Color;
+            optFrm.backCol.BackColor   = graphicsPanel1.BackColor;
+            optFrm.cellCol.BackColor   = liveCellBrush.Color;
+            if (toridal == true)
+                optFrm.Tororiad.Checked = true;
+            else
+                optFrm.Finite.Checked = true;
             
-
+           
             if (optFrm.ShowDialog() == DialogResult.OK)
             {
-               //do stuff
+                timerSecs = (int)optFrm.secUpDwn.Value;
+                uXLength = (int)optFrm.wUpDwn.Value;
+                uYLength = (int)optFrm.hUpDwn.Value;
+                gridCellPen.Color = optFrm.gridCol.BackColor;
+                gridCelx10lPen.Color = optFrm.gridx10Col.BackColor;
+                graphicsPanel1.BackColor = optFrm.backCol.BackColor;
+                liveCellBrush.Color = optFrm.cellCol.BackColor;
+                if (optFrm.Tororiad.Checked == true)
+                    toridal = true;
+                else
+                    toridal = false;
+                CellClass[,] tempUniverse = new CellClass[uXLength, uYLength];
+                someCells.Clear();
+                for (int y = 0; y < tempUniverse.GetLength(1); y++)
+                {
+                    for (int x = 0; x < tempUniverse.GetLength(0); x++)
+                    {
+                        tempUniverse[x, y] = new CellClass();
+                        tempUniverse[x, y].mX = x;
+                        tempUniverse[x, y].mY = y;
+                        someCells.Add(tempUniverse[x, y]);
+
+                    }
+                }
+                universe = tempUniverse;
+
             }
+            graphicsPanel1.Invalidate();
         }
 
         private void gridViewToolStripMenuItem_Click(object sender, EventArgs e)
@@ -348,11 +388,31 @@ namespace WindowsFormsApplication1
             uGenerations = 0;
             statusLabel1.Text = "Generations: " + uGenerations.ToString();
             myTimer.Enabled = false;
-            graphicsPanel1.Invalidate();
             viewGrid = true;
             gridCellPen.Color = Color.Black;
             gridCelx10lPen.Color = Color.Red;
+            graphicsPanel1.BackColor = Color.White;
+            liveCellBrush.Color = Color.Black;
             nextToolStripMenuItem.Enabled = true;
+            CellClass[,] tempUniverse = new CellClass[20, 20];
+            someCells.Clear();
+            for (int y = 0; y < tempUniverse.GetLength(1); y++)
+            {
+                for (int x = 0; x < tempUniverse.GetLength(0); x++)
+                {
+                    tempUniverse[x, y] = new CellClass();
+                    tempUniverse[x, y].mX = x;
+                    tempUniverse[x, y].mY = y;
+                    someCells.Add(tempUniverse[x, y]);
+
+                }
+            }
+            universe = tempUniverse;
+
+            uXLength = 20;
+            uYLength = 20;
+           
+            graphicsPanel1.Invalidate();
 
         }
 
