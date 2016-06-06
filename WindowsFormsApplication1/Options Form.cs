@@ -94,5 +94,14 @@ namespace WindowsFormsApplication1
             if (colorDialog1.ShowDialog() == DialogResult.OK)
                 liveCellColorButton.BackColor = colorDialog1.Color;
         }
+
+        private void resetButton_Click(object sender, EventArgs e)
+        {
+            gridColorButton.BackColor = Color.Black;
+            gridx10button.BackColor = Color.Red;
+            liveCellColorButton.BackColor = Color.Black;
+            backgrndColorButton.BackColor = Color.White;
+
+        }
     }
 }
