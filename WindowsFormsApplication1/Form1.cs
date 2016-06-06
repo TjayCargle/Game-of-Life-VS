@@ -24,9 +24,14 @@ namespace WindowsFormsApplication1
         Pen gridCellPen = new Pen(Color.Black, 1);
         Pen gridCelx10lPen = new Pen(Color.Red, 3);
         SolidBrush liveCellBrush = new SolidBrush(Color.Black);
+        SolidBrush numCellBrush = new SolidBrush(Color.Red);
         bool toridal = false;
         bool viewGrid = true;
         int runUntil = 0;
+        bool nCountVisible = true;
+        bool headsUp = true;
+        int aliveCellCOunt = 0;
+        int seed = 2001;
 
         //  List<CellClass> someCells = new List<CellClass>();
 
@@ -34,6 +39,15 @@ namespace WindowsFormsApplication1
         {
             InitializeComponent();
             statusLabel1.Text = "Generations: " + uGenerations.ToString();
+            toolStripStatusLabel2.Text = "Cell Count: " + aliveCellCOunt;
+            toolStripStatusLabel3.Text = "Seed: " + seed;
+            if (toridal == true)
+                toolStripStatusLabel4.Text = "Boundary Type: Toroidal";
+            else
+                toolStripStatusLabel4.Text = "Boundary Type: Finite";
+
+
+
             for (int y = 0; y < universe.GetLength(1); y++)
             {
                 for (int x = 0; x < universe.GetLength(0); x++)
@@ -80,51 +94,6 @@ namespace WindowsFormsApplication1
         void NextGen()
         {
 
-            /*
-            for (int y = 0; y < universe.GetLength(1); y++)
-            {
-                for (int x = 0; x < universe.GetLength(0); x++)
-                {
-                    int aCount = 0;// universe[x, y].GetAliveNeighborCount(someCells);
-
-                    if (universe[x,y].Alive == true)
-                    {
-
-
-                        if ( aCount < 2)
-                        {
-                            universe[x, y].Die = true;
-                        }
-
-                        else if (aCount > 3)
-                        {
-                            universe[x, y].Die = true;
-                        }
-                        else if (aCount == 2 || aCount == 3)
-                        {
-                            universe[x, y].Die = false;
-                        }
-                        else
-                        {
-                            return;
-                        }
-
-                       
-                    }
-
-                   
-                  else 
-                    {
-                        if (aCount == 3)
-                            universe[x, y].Die = false;
-                    }
-
-                    
-                }
-            }
-
-            
-            */
 
             for (int i = 0; i < someCells.Count; i++)
             {
@@ -180,16 +149,6 @@ namespace WindowsFormsApplication1
             }
             
 
-            /*
-            for (int y = 0; y < universe.GetLength(1); y++)
-            {
-                for (int x = 0; x < universe.GetLength(0); x++)
-                {
-
-                }
-            }*/
-
-
 
 
                 }
@@ -200,7 +159,7 @@ namespace WindowsFormsApplication1
         {
           uWidth = graphicsPanel1.ClientSize.Width / universe.GetLength(0); ;
           uHeight = graphicsPanel1.ClientSize.Height / universe.GetLength(1);
-
+            aliveCellCOunt = 0;
           
             for (int i = 0; i < someCells.Count; i++) 
             {
@@ -217,7 +176,7 @@ namespace WindowsFormsApplication1
 
                 if (someCells[i].Alive == true)
                 {
-                    
+                    aliveCellCOunt++;
                     e.Graphics.FillRectangle(liveCellBrush, aRect);
                 }
                 if (viewGrid == true)
@@ -239,31 +198,46 @@ namespace WindowsFormsApplication1
 
                     e.Graphics.DrawRectangle(gridCellPen, aRect.X, aRect.Y, aRect.Width, aRect.Height);
                 }
+                if (nCountVisible == true)
+                {
+                    int nCount = someCells[i].GetAliveNeighborCount(universe, toridal);
+                    Font myfont = new Font("Arial", (float)((uXLength+uYLength)*0.25 ) );
+                    StringFormat myFormat = new StringFormat();
+                    myFormat.Alignment = StringAlignment.Center;
+                    myFormat.LineAlignment = StringAlignment.Center;
+                    if (someCells[i].Alive == true && (nCount == 2 || nCount == 3) || someCells[i].Alive == false &&(nCount == 3))
+                        numCellBrush.Color = Color.Green;
+                    else
+                        numCellBrush.Color = Color.Red;
 
-                /*  
-
-      for (int x = 0; x < universe.GetLength(0); x++)
-          {
-
-              for (int y = 0; y < universe.GetLength(1); y++)
-              {}}
-      RectangleF aRect = Rectangle.Empty;
-                  aRect.X = x * uWidth;
-                  aRect.Y = y * uHeight;
-                  aRect.Width = uWidth;
-                  aRect.Height = uHeight;
-
-                  universe[x, y].myRectangle = aRect;
-                  universe[x, y].mX = x;
-                  universe[x, y].mY = y;
-                  universe[x, y].SetNeighbors(); */
-
-
-                // e.Graphics.DrawRectangle(Pens.Black, universe[x, y].myRectangle.X, universe[x, y].myRectangle.Y, universe[x, y].myRectangle.Width, universe[x, y].myRectangle.Height);
+                        if (nCount > 0)
+                    e.Graphics.DrawString(nCount.ToString(), myfont, numCellBrush, aRect, myFormat);
+                }
+           
 
 
             }
 
+            if (headsUp == true)
+            {
+                Font myfont = new Font("Arial", 10,FontStyle.Bold);
+                StringFormat myFormat = new StringFormat();
+                myFormat.Alignment = StringAlignment.Near;
+                myFormat.LineAlignment = StringAlignment.Near;
+                string gen = "Generations: " + uGenerations;
+                string cCOunt = "Cell Count: " + aliveCellCOunt;
+                string boundType;
+                if (toridal == true)
+                    boundType = "Boundary Type: Toroidal";
+                else
+                    boundType = "Boundary Type: Finite";
+                string uType = "Universe Size: {Width = " + uXLength + ", Height = " + uYLength + " }";
+                //string gen = "Generations: " + uGenerations;
+                e.Graphics.DrawString(gen, myfont, Brushes.Red, new Point (1, graphicsPanel1.Height -100 ), myFormat);
+                e.Graphics.DrawString(cCOunt, myfont, Brushes.Red, new Point(1, graphicsPanel1.Height - 80), myFormat);
+                e.Graphics.DrawString(boundType, myfont, Brushes.Red, new Point(1, graphicsPanel1.Height - 60), myFormat);
+                e.Graphics.DrawString(uType, myfont, Brushes.Red, new Point(1, graphicsPanel1.Height - 40), myFormat);
+            }
 
         }
 
@@ -438,8 +412,54 @@ namespace WindowsFormsApplication1
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
+
+            
         }
 
-       
+        private void headsUpVisibleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            if (headsUp == true)
+            {
+                headsUpVisibleToolStripMenuItem.Checked = false;
+                headsUp = false;
+            }
+            else
+            {
+                headsUpVisibleToolStripMenuItem.Checked = true;
+                headsUp = true;
+            }
+            graphicsPanel1.Invalidate();
+
+        }
+
+        private void neighborCountVisibleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (nCountVisible == true)
+            {
+                neighborCountVisibleToolStripMenuItem.Checked = false;
+                nCountVisible = false;
+            }
+            else
+            {
+                neighborCountVisibleToolStripMenuItem.Checked = true;
+                nCountVisible = true;
+            }
+            graphicsPanel1.Invalidate();
+
+        }
+
+        private void fromTimeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Random myRandom = new Random();
+            for (int i = 0; i < someCells.Count; i++)
+            {
+                if(myRandom.Next() % 2 == 0)
+                {
+                    someCells[i].Alive = !someCells[i].Alive;
+                }
+            }
+            graphicsPanel1.Invalidate();
+         }
     }
 }

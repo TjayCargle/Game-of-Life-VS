@@ -13,6 +13,7 @@ namespace WindowsFormsApplication1
         int mXpos;
         int mYpos;
         bool willDie;
+     
 
         CellClass[] myNeighbors = new CellClass[8];
 
@@ -94,7 +95,7 @@ namespace WindowsFormsApplication1
 
         public int NeiCount
         {
-            get { return aliveNeighborCount; }
+            
             set { aliveNeighborCount = value; }
         }
 
