@@ -5,6 +5,8 @@ using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
+using WindowsFormsApplication1.Properties;
+using FSPG;
 
 namespace WindowsFormsApplication1
 {
@@ -24,7 +26,7 @@ namespace WindowsFormsApplication1
         SolidBrush liveCellBrush = new SolidBrush(Color.Black);
         SolidBrush numCellBrush = new SolidBrush(Color.Red);
         bool toridal = false;
-        bool viewGrid = true;
+        bool viewGrid = false;
         int runUntil = 0;
         bool nCountVisible = true;
         bool headsUp = true;
@@ -61,6 +63,45 @@ namespace WindowsFormsApplication1
             myTimer.Tick += MyTimer_Tick;
             myTimer.Tag = "false";
             myTimer.Enabled = false;
+           // MessageBox.Show(gridCelx10lPen.Color.ToArgb().ToString());
+         
+            uGenerations = Properties.Settings.Default.Generations;
+            myTimer.Enabled = false;
+            viewGrid = Properties.Settings.Default.ViewGrid;
+            timerSecs = Properties.Settings.Default.TimerSecs;
+            gridCellPen.Color = Properties.Settings.Default.gridColor;
+            gridCelx10lPen.Color = Properties.Settings.Default.Gridx10Color;
+            liveCellBrush.Color = Properties.Settings.Default.LiveCellColor;
+            graphicsPanel1.BackColor = Properties.Settings.Default.BackColor;
+            toridal = Properties.Settings.Default.Torodial;
+            viewGrid = Properties.Settings.Default.ViewGrid;
+            runUntil = 0;
+            nCountVisible = Properties.Settings.Default.ViewNCount;
+            headsUp = Properties.Settings.Default.HeadsUp;
+            aliveCellCOunt = 0;
+            seed = 2001;
+            if(uXLength != Settings.Default.uX || uYLength != Settings.Default.uY)
+            {
+                uXLength = Properties.Settings.Default.uX;
+                uYLength = Properties.Settings.Default.uY;
+                for (int y = 0; y < universe.GetLength(1); y++)
+                {
+                    for (int x = 0; x < universe.GetLength(0); x++)
+                    {
+                        if (universe[x, y] == null)
+                        {
+                            universe[x, y] = new CellClass();
+                            universe[x, y].mX = x;
+                            universe[x, y].mY = y;
+
+                            someCells.Add(universe[x, y]);
+                        }
+
+                    }
+                }
+            }
+
+
         }
 
         private void MyTimer_Tick(object sender, EventArgs e)
@@ -402,8 +443,20 @@ namespace WindowsFormsApplication1
 
             uXLength = 20;
             uYLength = 20;
-           
-            graphicsPanel1.Invalidate();
+
+          timerSecs = 2;
+          gridCellPen = new Pen(Color.Black, 1);
+          gridCelx10lPen = new Pen(Color.Red, 3);
+          liveCellBrush = new SolidBrush(Color.Black);
+          numCellBrush = new SolidBrush(Color.Red);
+          toridal = false;
+          viewGrid = true;
+          runUntil = 0;
+          nCountVisible = true;
+          headsUp = true;
+          aliveCellCOunt = 0;
+          seed = 2001;
+          graphicsPanel1.Invalidate();
 
         }
 
@@ -428,9 +481,23 @@ namespace WindowsFormsApplication1
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
+          
+           
+            Properties.Settings.Default.ViewGrid = viewGrid;
+            Properties.Settings.Default.TimerSecs = timerSecs;
+            Properties.Settings.Default.gridColor = gridCellPen.Color;
+            Properties.Settings.Default.Gridx10Color = gridCelx10lPen.Color;
+            Properties.Settings.Default.LiveCellColor = liveCellBrush.Color;
+            Properties.Settings.Default.BackColor = graphicsPanel1.BackColor;
+            Properties.Settings.Default.Torodial = toridal;
+            Properties.Settings.Default.ViewGrid = viewGrid;
+            Properties.Settings.Default.uX = uXLength;
+            Properties.Settings.Default.uY = uYLength;
+            nCountVisible = Properties.Settings.Default.ViewNCount;
+            headsUp = Properties.Settings.Default.HeadsUp;
+            Properties.Settings.Default.Save();
             this.Close();
 
-            
         }
 
         private void headsUpVisibleToolStripMenuItem_Click(object sender, EventArgs e)
@@ -517,6 +584,9 @@ namespace WindowsFormsApplication1
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveFileDialog mySave = new SaveFileDialog();
+
+            Directory.CreateDirectory(Application.StartupPath + @"\saves");
+            mySave.InitialDirectory = (Application.StartupPath + @"\Saves");
             mySave.Filter = "All Files|*.*|Cells|*.cells";
             mySave.FilterIndex = 2;
             mySave.DefaultExt = "cells";
@@ -534,13 +604,30 @@ namespace WindowsFormsApplication1
                     }
                     myWriter.WriteLine();
                  }
+                myWriter.WriteLine("$," + uGenerations.ToString() + "," + viewGrid.ToString() + "," + timerSecs.ToString() + "," + gridCellPen.Color.ToArgb().ToString() + "," + gridCelx10lPen.Color.ToArgb().ToString() + "," + liveCellBrush.Color.ToArgb().ToString() + "," + graphicsPanel1.BackColor.ToArgb().ToString() + "," + toridal.ToString() + "," + nCountVisible.ToString() + "," + headsUp.ToString() + "," + "," + uXLength.ToString() + "," + "," + uYLength.ToString());
                 myWriter.Close();
             }
+
+            uGenerations = Properties.Settings.Default.Generations;
+            Properties.Settings.Default.ViewGrid = viewGrid;
+            Properties.Settings.Default.TimerSecs = timerSecs;               
+            Properties.Settings.Default.gridColor  =  gridCellPen.Color;
+            Properties.Settings.Default.Gridx10Color = gridCelx10lPen.Color;
+            Properties.Settings.Default.LiveCellColor = liveCellBrush.Color;
+            Properties.Settings.Default.BackColor = graphicsPanel1.BackColor;
+            Properties.Settings.Default.Torodial = toridal;
+            nCountVisible = Properties.Settings.Default.ViewNCount;
+            headsUp = Properties.Settings.Default.HeadsUp;
+            Properties.Settings.Default.uX = uXLength;
+            Properties.Settings.Default.uY = uYLength;
+            Properties.Settings.Default.Save();
+           
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog myOpen = new OpenFileDialog();
+            myOpen.InitialDirectory = Application.StartupPath;
             myOpen.Filter = "All Files|*.*|Cells|*.cells";
             myOpen.FilterIndex = 2;
             if(DialogResult.OK == myOpen.ShowDialog())
@@ -551,8 +638,28 @@ namespace WindowsFormsApplication1
                 while(!myReader.EndOfStream)
                 {
                     string aRow = myReader.ReadLine();
-                    maxY++;
-                    maxX = aRow.Length;
+                    if (aRow[0] != '$')
+                    {
+                        maxY++;
+                        maxX = aRow.Length;
+                    }
+                    else
+                    {
+                        string[] mySettings = aRow.Split(',');
+                        uGenerations = Convert.ToInt32(mySettings[1]) ;
+                        myTimer.Enabled = false;
+                        viewGrid = Convert.ToBoolean(mySettings[2]);
+                        timerSecs = Convert.ToInt32(mySettings[3]);
+                        gridCellPen.Color = Color.FromArgb(Convert.ToInt32(mySettings[4])); 
+                        gridCelx10lPen.Color = Color.FromArgb(Convert.ToInt32(mySettings[5]));
+                        liveCellBrush.Color = Color.FromArgb(Convert.ToInt32(mySettings[6]));
+                        graphicsPanel1.BackColor = Color.FromArgb(Convert.ToInt32(mySettings[7]));
+                        toridal = Convert.ToBoolean(mySettings[8]);
+                        nCountVisible = Convert.ToBoolean(mySettings[9]);
+                        headsUp = Convert.ToBoolean(mySettings[10]);
+                      
+
+                    }
                 }
                 CellClass[,] tempUniverse = new CellClass[maxX, maxY];
                 someCells.Clear();
@@ -581,7 +688,7 @@ namespace WindowsFormsApplication1
                     {
                         if (aRow[xPos] == 'O')
                             universe[xPos, yPos].Alive = true;
-                        else
+                        else if (aRow[xPos] == '.')
                         { universe[xPos, yPos].Alive = false; }
                     }
                     yPos++;
@@ -596,6 +703,7 @@ namespace WindowsFormsApplication1
         private void importToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog myOpen = new OpenFileDialog();
+            myOpen.InitialDirectory = Application.StartupPath;
             myOpen.Filter = "All Files|*.*|Cells|*.cells";
             myOpen.FilterIndex = 2;
             if (DialogResult.OK == myOpen.ShowDialog())
@@ -610,7 +718,7 @@ namespace WindowsFormsApplication1
                     maxX = aRow.Length;
                 }
                 if (maxX != uXLength || maxY != uYLength)
-                   if( DialogResult.OK == MessageBox.Show("The importing cell grid is a different size than the current one \n importing data may lead to lost cell data. \nContinue? "))
+                   if( DialogResult.OK == MessageBox.Show("The importing cell grid is a different size than the current one \n importing data may lead to lost cell data. \nContinue? ","Warning!",MessageBoxButtons.OKCancel))
                     {
                         for (int y = 0; y < universe.GetLength(1); y++)
                         {
@@ -659,6 +767,90 @@ namespace WindowsFormsApplication1
 
             graphicsPanel1.Invalidate();
 
+        }
+
+        private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            uGenerations = Properties.Settings.Default.Generations;
+            myTimer.Enabled = false;
+            viewGrid = Properties.Settings.Default.ViewGrid;
+            timerSecs = Properties.Settings.Default.TimerSecs;
+            gridCellPen.Color = Properties.Settings.Default.gridColor;
+            gridCelx10lPen.Color = Properties.Settings.Default.Gridx10Color;
+            liveCellBrush.Color = Properties.Settings.Default.LiveCellColor;
+            graphicsPanel1.BackColor = Properties.Settings.Default.BackColor;
+            toridal = Properties.Settings.Default.Torodial;
+            viewGrid = Properties.Settings.Default.ViewGrid;
+            runUntil = 0;
+            nCountVisible = Properties.Settings.Default.ViewNCount;
+            headsUp = Properties.Settings.Default.HeadsUp;
+            aliveCellCOunt = 0;
+            seed = 2001;
+            if (uXLength != Settings.Default.uX || uYLength != Settings.Default.uY)
+            {
+                Settings.Default.uX = uXLength;
+                Settings.Default.uY = uYLength;
+                for (int y = 0; y < universe.GetLength(1); y++)
+                {
+                    for (int x = 0; x < universe.GetLength(0); x++)
+                    {
+                        if (universe[x, y] == null)
+                        {
+                            universe[x, y] = new CellClass();
+                            universe[x, y].mX = x;
+                            universe[x, y].mY = y;
+
+                            someCells.Add(universe[x, y]);
+                        }
+
+                    }
+                }
+            }
+
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Properties.Settings.Default.Generations = uGenerations;
+            Properties.Settings.Default.ViewGrid = viewGrid;
+            Properties.Settings.Default.TimerSecs = timerSecs;
+            Properties.Settings.Default.gridColor = gridCellPen.Color;
+            Properties.Settings.Default.Gridx10Color = gridCelx10lPen.Color;
+            Properties.Settings.Default.LiveCellColor = liveCellBrush.Color;
+            Properties.Settings.Default.BackColor = graphicsPanel1.BackColor;
+            Properties.Settings.Default.Torodial = toridal;
+            Properties.Settings.Default.ViewGrid = viewGrid;
+            Properties.Settings.Default.uX = uXLength;
+            Properties.Settings.Default.uY = uYLength;
+            nCountVisible = Properties.Settings.Default.ViewNCount;
+            headsUp = Properties.Settings.Default.HeadsUp;
+            Properties.Settings.Default.Save();
+            Settings.Default.Save();
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Properties.Settings.Default.Generations = uGenerations;
+            Properties.Settings.Default.ViewGrid = viewGrid;
+            Properties.Settings.Default.TimerSecs = timerSecs;
+            Properties.Settings.Default.gridColor = gridCellPen.Color;
+            Properties.Settings.Default.Gridx10Color = gridCelx10lPen.Color;
+            Properties.Settings.Default.LiveCellColor = liveCellBrush.Color;
+            Properties.Settings.Default.BackColor = graphicsPanel1.BackColor;
+            Properties.Settings.Default.Torodial = toridal;
+            Properties.Settings.Default.ViewGrid = viewGrid;
+            Properties.Settings.Default.uX = uXLength;
+            Properties.Settings.Default.uY = uYLength;
+            nCountVisible = Properties.Settings.Default.ViewNCount;
+            headsUp = Properties.Settings.Default.HeadsUp;
+            Properties.Settings.Default.Save();
+            Settings.Default.Save();
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AboutBox1 myAbout = new AboutBox1();
+            myAbout.Show();
         }
     }
 }
