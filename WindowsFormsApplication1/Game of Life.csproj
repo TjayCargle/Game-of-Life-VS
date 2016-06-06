@@ -70,6 +70,12 @@
     <Compile Include="Run2Form.Designer.cs">
       <DependentUpon>Run2Form.cs</DependentUpon>
     </Compile>
+    <Compile Include="SeedForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SeedForm.Designer.cs">
+      <DependentUpon>SeedForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -87,6 +93,9 @@
     </Compile>
     <EmbeddedResource Include="Run2Form.resx">
       <DependentUpon>Run2Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SeedForm.resx">
+      <DependentUpon>SeedForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 
 namespace WindowsFormsApplication1
 {
@@ -238,6 +236,13 @@ namespace WindowsFormsApplication1
                 e.Graphics.DrawString(boundType, myfont, Brushes.Red, new Point(1, graphicsPanel1.Height - 60), myFormat);
                 e.Graphics.DrawString(uType, myfont, Brushes.Red, new Point(1, graphicsPanel1.Height - 40), myFormat);
             }
+            statusLabel1.Text = "Generations: " + uGenerations.ToString();
+            toolStripStatusLabel2.Text = "Cell Count: " + aliveCellCOunt;
+            toolStripStatusLabel3.Text = "Seed: " + seed;
+            if (toridal == true)
+                toolStripStatusLabel4.Text = "Boundary Type: Toroidal";
+            else
+                toolStripStatusLabel4.Text = "Boundary Type: Finite";
 
         }
 
@@ -302,13 +307,22 @@ namespace WindowsFormsApplication1
                 optFrm.Tororiad.Checked = true;
             else
                 optFrm.Finite.Checked = true;
-            
-           
+
+
             if (optFrm.ShowDialog() == DialogResult.OK)
             {
+                bool uChanged = false;
                 timerSecs = (int)optFrm.secUpDwn.Value;
-                uXLength = (int)optFrm.wUpDwn.Value;
+                if (uXLength != (int)optFrm.wUpDwn.Value)
+                {
+                    uXLength = (int)optFrm.wUpDwn.Value;
+                    uChanged = true;
+                }
+                if (uYLength != (int)optFrm.hUpDwn.Value)
+                { 
                 uYLength = (int)optFrm.hUpDwn.Value;
+                uChanged = true;
+                 }
                 gridCellPen.Color = optFrm.gridCol.BackColor;
                 gridCelx10lPen.Color = optFrm.gridx10Col.BackColor;
                 graphicsPanel1.BackColor = optFrm.backCol.BackColor;
@@ -317,20 +331,23 @@ namespace WindowsFormsApplication1
                     toridal = true;
                 else
                     toridal = false;
-                CellClass[,] tempUniverse = new CellClass[uXLength, uYLength];
-                someCells.Clear();
-                for (int y = 0; y < tempUniverse.GetLength(1); y++)
+                if (uChanged == true)
                 {
-                    for (int x = 0; x < tempUniverse.GetLength(0); x++)
+                    CellClass[,] tempUniverse = new CellClass[uXLength, uYLength];
+                    someCells.Clear();
+                    for (int y = 0; y < tempUniverse.GetLength(1); y++)
                     {
-                        tempUniverse[x, y] = new CellClass();
-                        tempUniverse[x, y].mX = x;
-                        tempUniverse[x, y].mY = y;
-                        someCells.Add(tempUniverse[x, y]);
+                        for (int x = 0; x < tempUniverse.GetLength(0); x++)
+                        {
+                            tempUniverse[x, y] = new CellClass();
+                            tempUniverse[x, y].mX = x;
+                            tempUniverse[x, y].mY = y;
+                            someCells.Add(tempUniverse[x, y]);
 
+                        }
                     }
+                    universe = tempUniverse;
                 }
-                universe = tempUniverse;
 
             }
             graphicsPanel1.Invalidate();
@@ -461,5 +478,187 @@ namespace WindowsFormsApplication1
             }
             graphicsPanel1.Invalidate();
          }
+
+        private void fromCurrentSeedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Random myRandom = new Random(seed);
+            for (int i = 0; i < someCells.Count; i++)
+            {
+                if (myRandom.Next(seed) % 2 == 0)
+                {
+                    someCells[i].Alive = !someCells[i].Alive;
+                }
+            }
+            graphicsPanel1.Invalidate();
+        }
+
+        private void fromNewSeedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SeedForm newSeed = new SeedForm();
+
+            newSeed.seedUpDwn.Value = seed;
+            
+      
+            if (newSeed.ShowDialog() == DialogResult.OK)
+            {
+                seed = (int)newSeed.seedUpDwn.Value;
+                Random myRandom = new Random(seed);
+                for (int i = 0; i < someCells.Count; i++)
+                {
+                    if (myRandom.Next(seed) % 2 == 0)
+                    {
+                        someCells[i].Alive = !someCells[i].Alive;
+                    }
+                }
+            }
+            graphicsPanel1.Invalidate();
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog mySave = new SaveFileDialog();
+            mySave.Filter = "All Files|*.*|Cells|*.cells";
+            mySave.FilterIndex = 2;
+            mySave.DefaultExt = "cells";
+            if (DialogResult.OK == mySave.ShowDialog())
+            {
+                StreamWriter myWriter = new StreamWriter(mySave.FileName);
+                for (int y = 0; y < universe.GetLength(1); y++)
+                {
+                    for (int x = 0; x < universe.GetLength(0); x++)
+                    {
+                        if (universe[x, y].Alive == true)
+                            myWriter.Write('O');
+                        else
+                            myWriter.Write('.');
+                    }
+                    myWriter.WriteLine();
+                 }
+                myWriter.Close();
+            }
+        }
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog myOpen = new OpenFileDialog();
+            myOpen.Filter = "All Files|*.*|Cells|*.cells";
+            myOpen.FilterIndex = 2;
+            if(DialogResult.OK == myOpen.ShowDialog())
+            {
+                StreamReader myReader = new StreamReader(myOpen.FileName);
+                int maxX = 0;
+                int maxY = 0;
+                while(!myReader.EndOfStream)
+                {
+                    string aRow = myReader.ReadLine();
+                    maxY++;
+                    maxX = aRow.Length;
+                }
+                CellClass[,] tempUniverse = new CellClass[maxX, maxY];
+                someCells.Clear();
+                for (int y = 0; y < tempUniverse.GetLength(1); y++)
+                {
+                    for (int x = 0; x < tempUniverse.GetLength(0); x++)
+                    {
+                        tempUniverse[x, y] = new CellClass();
+                        tempUniverse[x, y].mX = x;
+                        tempUniverse[x, y].mY = y;
+                   
+                        someCells.Add(tempUniverse[x, y]);
+
+                    }
+                }
+                universe = tempUniverse;
+                uXLength = maxX;
+                uYLength = maxY;
+                
+                myReader.BaseStream.Seek(0, SeekOrigin.Begin);
+                int yPos = 0;
+                while(!myReader.EndOfStream)
+                {
+                    string aRow = myReader.ReadLine();
+                    for (int xPos = 0; xPos < aRow.Length; xPos++)
+                    {
+                        if (aRow[xPos] == 'O')
+                            universe[xPos, yPos].Alive = true;
+                        else
+                        { universe[xPos, yPos].Alive = false; }
+                    }
+                    yPos++;
+                }
+
+                myReader.Close();
+            }
+
+            graphicsPanel1.Invalidate();
+        }
+
+        private void importToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog myOpen = new OpenFileDialog();
+            myOpen.Filter = "All Files|*.*|Cells|*.cells";
+            myOpen.FilterIndex = 2;
+            if (DialogResult.OK == myOpen.ShowDialog())
+            {
+                StreamReader myReader = new StreamReader(myOpen.FileName);
+                int maxX = 0;
+                int maxY = 0;
+                while (!myReader.EndOfStream)
+                {
+                    string aRow = myReader.ReadLine();
+                    maxY++;
+                    maxX = aRow.Length;
+                }
+                if (maxX != uXLength || maxY != uYLength)
+                   if( DialogResult.OK == MessageBox.Show("The importing cell grid is a different size than the current one \n importing data may lead to lost cell data. \nContinue? "))
+                    {
+                        for (int y = 0; y < universe.GetLength(1); y++)
+                        {
+                            for (int x = 0; x < universe.GetLength(0); x++)
+                            {
+                                if (universe[x, y] == null)
+                                {
+                                    universe[x, y] = new CellClass();
+                                    universe[x, y].mX = x;
+                                    universe[x, y].mY = y;
+
+                                    someCells.Add(universe[x, y]);
+                                }
+
+                            }
+                        }
+
+
+                        myReader.BaseStream.Seek(0, SeekOrigin.Begin);
+                        int yPos = 0;
+                        while (!myReader.EndOfStream)
+                        {
+                            string aRow = myReader.ReadLine();
+                            for (int xPos = 0; xPos < aRow.Length; xPos++)
+                            {
+                              
+                                    if (yPos >= uYLength || xPos >= uXLength)
+                                        continue;
+                                if (universe[xPos, yPos] == null || universe[xPos,yPos].Alive == false)
+                                {
+                                    if (aRow[xPos] == 'O')
+                                        universe[xPos, yPos].Alive = true;
+                                    else
+                                    { universe[xPos, yPos].Alive = false; }
+                                }
+                            }
+                            yPos++;
+                        }
+                    }
+              
+                
+           
+
+                myReader.Close();
+            }
+
+            graphicsPanel1.Invalidate();
+
+        }
     }
 }
