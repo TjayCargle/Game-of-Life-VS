@@ -12,6 +12,8 @@ namespace WindowsFormsApplication1
 {
     public partial class Form1 : Form
     {
+        //initializing public variables
+
         int uXLength = 20;
         int uYLength = 20;
         CellClass[,] universe = new CellClass[20, 20];
@@ -32,12 +34,13 @@ namespace WindowsFormsApplication1
         bool headsUp = true;
         int aliveCellCOunt = 0;
         int seed = 2001;
-
-        //  List<CellClass> someCells = new List<CellClass>();
+     
 
         public Form1()
         {
             InitializeComponent();
+
+            //Setting Labels
             statusLabel1.Text = "Generations: " + uGenerations.ToString();
             toolStripStatusLabel2.Text = "Cell Count: " + aliveCellCOunt;
             toolStripStatusLabel3.Text = "Seed: " + seed;
@@ -47,7 +50,7 @@ namespace WindowsFormsApplication1
                 toolStripStatusLabel4.Text = "Boundary Type: Finite";
 
 
-
+            //Creating Universe and appending Cells to a list
             for (int y = 0; y < universe.GetLength(1); y++)
             {
                 for (int x = 0; x < universe.GetLength(0); x++)
@@ -59,12 +62,14 @@ namespace WindowsFormsApplication1
                    
                 }
             }
+
+            //Setting up timer
             myTimer.Interval = timerSecs;
             myTimer.Tick += MyTimer_Tick;
             myTimer.Tag = "false";
             myTimer.Enabled = false;
-           // MessageBox.Show(gridCelx10lPen.Color.ToArgb().ToString());
-         
+          
+            //Setting variables to saved settings
             uGenerations = Properties.Settings.Default.Generations;
             myTimer.Enabled = false;
             viewGrid = Properties.Settings.Default.ViewGrid;
@@ -80,6 +85,8 @@ namespace WindowsFormsApplication1
             headsUp = Properties.Settings.Default.HeadsUp;
             aliveCellCOunt = 0;
             seed = 2001;
+
+            //If saved setting for universe is different, Create new universse
             if(uXLength != Settings.Default.uX || uYLength != Settings.Default.uY)
             {
                 uXLength = Properties.Settings.Default.uX;
@@ -115,13 +122,16 @@ namespace WindowsFormsApplication1
             //update toolstrip
             statusLabel1.Text = "Generations: " + uGenerations.ToString();
 
+
             graphicsPanel1.Invalidate();
 
+            //Check if timer runs just once
             if (myTimer.Tag.ToString() == "true")
             {
                 myTimer.Enabled = false;
                 myTimer.Tag = false;
             }
+            //Stops the timer if it runs until has been met
             if (runUntil > 0)
                 if (uGenerations == runUntil)
                     myTimer.Enabled = false;
@@ -136,12 +146,13 @@ namespace WindowsFormsApplication1
 
             for (int i = 0; i < someCells.Count; i++)
             {
-                int aCount = someCells[i].GetAliveNeighborCount(universe, toridal); // universe[x, y].GetAliveNeighborCount(someCells);
+                //Gets neighbor count of cell
+                int aCount = someCells[i].GetAliveNeighborCount(universe, toridal); 
 
                 if (universe[someCells[i].mX, someCells[i].mY].Alive == true)
                 {
 
-
+                    //Check who will die based off rules
                     if (aCount < 2)
                     {
                         universe[someCells[i].mX, someCells[i].mY].Die = true;
@@ -174,7 +185,7 @@ namespace WindowsFormsApplication1
 
             for (int i = 0; i < someCells.Count; i++)
             {
-
+                //Applying rules
                 if (universe[someCells[i].mX, someCells[i].mY].Die == false)
                 {
                     universe[someCells[i].mX, someCells[i].mY].Alive = true;
@@ -196,13 +207,14 @@ namespace WindowsFormsApplication1
 
         private void graphicsPanel1_Paint(object sender, PaintEventArgs e)
         {
+            //Getting dimensions
           uWidth = graphicsPanel1.ClientSize.Width / universe.GetLength(0); ;
           uHeight = graphicsPanel1.ClientSize.Height / universe.GetLength(1);
-            aliveCellCOunt = 0;
+          aliveCellCOunt = 0;
           
             for (int i = 0; i < someCells.Count; i++) 
             {
-
+                //Creating rectangle for cells and giving it to them
                 RectangleF aRect = Rectangle.Empty;
                 aRect.X = someCells[i].mX * uWidth;
                 aRect.Y = someCells[i].mY * uHeight;
@@ -213,6 +225,7 @@ namespace WindowsFormsApplication1
                
                 someCells[i].SetNeighbors();
 
+                //if cell is alive, draw it
                 if (someCells[i].Alive == true)
                 {
                     aliveCellCOunt++;
@@ -221,17 +234,14 @@ namespace WindowsFormsApplication1
                 if (viewGrid == true)
                 {
                     if (someCells[i].mY % 10 == 0)
-                    {
-                        // e.Graphics.DrawRectangle(Pens.Red, aRect.X, aRect.Y, aRect.Width, aRect.Height);
-                        //e.Graphics.DrawLine(Pens.Red, aRect.X, aRect.Y, graphicsPanel1.Width,graphicsPanel1.Height);
+                    {   //Draws Grid                   
                         Pen aPen = new Pen(Color.Red, 3);
                         e.Graphics.DrawLine(aPen, aRect.X, aRect.Y, graphicsPanel1.Width, aRect.Y);
-                        //e.Graphics.DrawLine(aPen, new Point((int)aRect.X, (int)aRect.Y), new Point(graphicsPanel1.Width, (int)aRect.Y));
                         e.Graphics.DrawLine(aPen, aRect.X, aRect.Y, graphicsPanel1.Width, aRect.Y);
                     }
+                    //Draws x10 Grid
                     if (someCells[i].mX % 10 == 0)
                     {
-
                         e.Graphics.DrawLine(gridCelx10lPen, aRect.X, aRect.Y, aRect.X, graphicsPanel1.Height);
                     }
 
@@ -239,6 +249,7 @@ namespace WindowsFormsApplication1
                 }
                 if (nCountVisible == true)
                 {
+                    //Displays neighbor count
                     int nCount = someCells[i].GetAliveNeighborCount(universe, toridal);
                     Font myfont = new Font("Arial", (float)((uXLength+uYLength)*0.25 ) );
                     StringFormat myFormat = new StringFormat();
@@ -259,6 +270,7 @@ namespace WindowsFormsApplication1
 
             if (headsUp == true)
             {
+                // Writes the "Heads Up information"
                 Font myfont = new Font("Arial", 10,FontStyle.Bold);
                 StringFormat myFormat = new StringFormat();
                 myFormat.Alignment = StringAlignment.Near;
@@ -271,7 +283,7 @@ namespace WindowsFormsApplication1
                 else
                     boundType = "Boundary Type: Finite";
                 string uType = "Universe Size: {Width = " + uXLength + ", Height = " + uYLength + " }";
-                //string gen = "Generations: " + uGenerations;
+         
                 e.Graphics.DrawString(gen, myfont, Brushes.Red, new Point (1, graphicsPanel1.Height -100 ), myFormat);
                 e.Graphics.DrawString(cCOunt, myfont, Brushes.Red, new Point(1, graphicsPanel1.Height - 80), myFormat);
                 e.Graphics.DrawString(boundType, myfont, Brushes.Red, new Point(1, graphicsPanel1.Height - 60), myFormat);
@@ -289,18 +301,29 @@ namespace WindowsFormsApplication1
 
         private void graphicsPanel1_MouseClick(object sender, MouseEventArgs e)
         {
-            int x = e.X / (int)uWidth;
-            int  y = e.Y / (int)uHeight;
-            universe[x, y].Alive = !universe[x,y].Alive;
-           
-            graphicsPanel1.Invalidate();
+            if (e.Button == MouseButtons.Left)
+            {
+                //Turns the universe at that position on/off
+                int x = e.X / (int)uWidth;
+                int y = e.Y / (int)uHeight;
+                universe[x, y].Alive = !universe[x, y].Alive;
 
-           
+                graphicsPanel1.Invalidate();
+
+            }
+            else if(e.Button == MouseButtons.Right)
+            {// Displays the Context Menu Strip
+                gridVisibleToolStripMenuItem.Checked = viewGrid;
+                headsUpVisibleToolStripMenuItem1.Checked = headsUp;
+                nToolStripMenuItem.Checked = nCountVisible;
+                contextMenuStrip1.Show(PointToScreen(e.Location));
+            }
             
         }
 
         private void newToolStripMenuItem1_Click(object sender, EventArgs e)
         {
+            //Clears the cells
 
             for (int i = 0; i < someCells.Count; i++)
             {
@@ -316,19 +339,21 @@ namespace WindowsFormsApplication1
 
         private void startToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //Start TImer
             myTimer.Enabled = true;
             nextToolStripMenuItem.Enabled = false;
         }
 
         private void pauseToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //Pauses Timer
             myTimer.Enabled = false;
             nextToolStripMenuItem.Enabled = true;
         }
 
         private void nextToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            //Runs timer once
             myTimer.Tag = "true";
             myTimer.Enabled = true;
 
@@ -336,6 +361,7 @@ namespace WindowsFormsApplication1
 
         private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //Create Options Form
             Options_Form optFrm = new Options_Form();
             optFrm.secUpDwn.Value      = timerSecs;
             optFrm.wUpDwn.Value        = uXLength;
@@ -349,7 +375,7 @@ namespace WindowsFormsApplication1
             else
                 optFrm.Finite.Checked = true;
 
-
+            //Get information from options form
             if (optFrm.ShowDialog() == DialogResult.OK)
             {
                 bool uChanged = false;
@@ -396,6 +422,7 @@ namespace WindowsFormsApplication1
 
         private void gridViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //Turn on/off View Grid
             if (viewGrid == true)
             {
                 gridViewToolStripMenuItem.Checked = false;
@@ -411,7 +438,8 @@ namespace WindowsFormsApplication1
 
         private void resetToolStripMenuItem_Click(object sender, EventArgs e)
         {
-    
+
+            //Resets everything to default
 
             for (int i = 0; i < someCells.Count; i++)
             {
@@ -462,6 +490,7 @@ namespace WindowsFormsApplication1
 
         private void runToToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //Runs Timer unitl....
       
             Run2Form run2 = new Run2Form();
 
@@ -471,17 +500,17 @@ namespace WindowsFormsApplication1
             if (run2.ShowDialog() == DialogResult.OK)
             {
                 runUntil = (int)run2.runnerUpDwn.Value;
-                
-               
+
+                myTimer.Enabled = true;
             }
-            myTimer.Enabled = true;
+         
 
 
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-          
+          //Saves settings and closes 
            
             Properties.Settings.Default.ViewGrid = viewGrid;
             Properties.Settings.Default.TimerSecs = timerSecs;
@@ -502,6 +531,7 @@ namespace WindowsFormsApplication1
 
         private void headsUpVisibleToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //Turns on/off Heads Up
 
             if (headsUp == true)
             {
@@ -519,6 +549,7 @@ namespace WindowsFormsApplication1
 
         private void neighborCountVisibleToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //Turns on/off neighbor count
             if (nCountVisible == true)
             {
                 neighborCountVisibleToolStripMenuItem.Checked = false;
@@ -535,6 +566,7 @@ namespace WindowsFormsApplication1
 
         private void fromTimeToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //Randomizes from time
             Random myRandom = new Random();
             for (int i = 0; i < someCells.Count; i++)
             {
@@ -548,6 +580,7 @@ namespace WindowsFormsApplication1
 
         private void fromCurrentSeedToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //Randomizes based off of current seed
             Random myRandom = new Random(seed);
             for (int i = 0; i < someCells.Count; i++)
             {
@@ -561,6 +594,7 @@ namespace WindowsFormsApplication1
 
         private void fromNewSeedToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //Makes a new seed for random
             SeedForm newSeed = new SeedForm();
 
             newSeed.seedUpDwn.Value = seed;
@@ -583,6 +617,7 @@ namespace WindowsFormsApplication1
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //Saves out the unviverse and settings
             SaveFileDialog mySave = new SaveFileDialog();
 
             Directory.CreateDirectory(Application.StartupPath + @"\saves");
@@ -626,6 +661,7 @@ namespace WindowsFormsApplication1
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //Opens up a universe
             OpenFileDialog myOpen = new OpenFileDialog();
             myOpen.InitialDirectory = Application.StartupPath;
             myOpen.Filter = "All Files|*.*|Cells|*.cells";
@@ -702,6 +738,7 @@ namespace WindowsFormsApplication1
 
         private void importToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //Import cells into existing universe
             OpenFileDialog myOpen = new OpenFileDialog();
             myOpen.InitialDirectory = Application.StartupPath;
             myOpen.Filter = "All Files|*.*|Cells|*.cells";
@@ -771,6 +808,7 @@ namespace WindowsFormsApplication1
 
         private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //Reloads settings from startup 
             uGenerations = Properties.Settings.Default.Generations;
             myTimer.Enabled = false;
             viewGrid = Properties.Settings.Default.ViewGrid;
@@ -811,6 +849,7 @@ namespace WindowsFormsApplication1
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
+            //Saves settings as it closes 
             Properties.Settings.Default.Generations = uGenerations;
             Properties.Settings.Default.ViewGrid = viewGrid;
             Properties.Settings.Default.TimerSecs = timerSecs;
@@ -830,6 +869,7 @@ namespace WindowsFormsApplication1
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
+            //Saves settings after closed 
             Properties.Settings.Default.Generations = uGenerations;
             Properties.Settings.Default.ViewGrid = viewGrid;
             Properties.Settings.Default.TimerSecs = timerSecs;
@@ -852,5 +892,6 @@ namespace WindowsFormsApplication1
             AboutBox1 myAbout = new AboutBox1();
             myAbout.Show();
         }
+
     }
 }
